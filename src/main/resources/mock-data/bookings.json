@@ -1,0 +1,55 @@
+[
+  {
+    "customerEmail": "customer@pgstay.in",
+    "pgName": "Sri Sai Comforts Men's PG",
+    "roomNumber": "101",
+    "bedLabel": "A",
+    "bookingType": "YEARLY",
+    "paymentPlan": "MONTHLY",
+    "duration": 1,
+    "startOffsetDays": -60,
+    "stage": "BOOKED",
+    "paidInstallments": 2
+  },
+  {
+    "customerEmail": "customer@pgstay.in",
+    "pgName": "Green Nest Co-Living",
+    "roomNumber": "102",
+    "bedLabel": "A",
+    "bookingType": "MONTHLY",
+    "duration": 3,
+    "startOffsetDays": 5,
+    "stage": "REQUESTED"
+  },
+  {
+    "customerEmail": "customer2@pgstay.in",
+    "pgName": "Sri Sai Comforts Men's PG",
+    "roomNumber": "103",
+    "bedLabel": "B",
+    "bookingType": "MONTHLY",
+    "duration": 6,
+    "startOffsetDays": 2,
+    "stage": "PAYMENT_SUBMITTED"
+  },
+  {
+    "customerEmail": "customer2@pgstay.in",
+    "pgName": "HSR Women's Nest",
+    "roomNumber": "101",
+    "bedLabel": "A",
+    "bookingType": "MONTHLY",
+    "duration": 6,
+    "startOffsetDays": -45,
+    "stage": "BOOKED",
+    "paidInstallments": 1
+  },
+  {
+    "customerEmail": "customer2@pgstay.in",
+    "pgName": "Lakshmi Ladies Hostel",
+    "roomNumber": "201",
+    "bedLabel": "A",
+    "bookingType": "WEEKLY",
+    "duration": 2,
+    "startOffsetDays": 3,
+    "stage": "APPROVED"
+  }
+]

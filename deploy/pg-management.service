@@ -1,0 +1,18 @@
+# systemd unit for the PG Management API on a GoDaddy VPS (Ubuntu/AlmaLinux).
+# Install:  sudo cp deploy/pg-management.service /etc/systemd/system/
+#           sudo systemctl daemon-reload && sudo systemctl enable --now pg-management
+[Unit]
+Description=PG Management API (Spring Boot)
+After=network.target
+
+[Service]
+User=pgapp
+WorkingDirectory=/opt/pg-management
+EnvironmentFile=/opt/pg-management/pg-management.env
+ExecStart=/usr/bin/java -Xms256m -Xmx512m -jar /opt/pg-management/pg-management-backend.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

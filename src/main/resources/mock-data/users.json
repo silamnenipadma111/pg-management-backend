@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Ravi Kumar",
+    "email": "owner@pgstay.in",
+    "phone": "9876543210",
+    "password": "Password@123",
+    "role": "OWNER",
+    "gender": "MALE"
+  },
+  {
+    "name": "Lakshmi Reddy",
+    "email": "owner2@pgstay.in",
+    "phone": "9876543211",
+    "password": "Password@123",
+    "role": "OWNER",
+    "gender": "FEMALE"
+  },
+  {
+    "name": "Anil Varma",
+    "email": "customer@pgstay.in",
+    "phone": "9123456780",
+    "password": "Password@123",
+    "role": "CUSTOMER",
+    "gender": "MALE"
+  },
+  {
+    "name": "Priya Sharma",
+    "email": "customer2@pgstay.in",
+    "phone": "9123456781",
+    "password": "Password@123",
+    "role": "CUSTOMER",
+    "gender": "FEMALE"
+  },
+  {
+    "name": "Customer Care",
+    "email": "support@pgstay.in",
+    "phone": "18001234567",
+    "password": "Password@123",
+    "role": "SUPPORT",
+    "gender": null
+  }
+]
