@@ -116,6 +116,14 @@ public class AuthService {
                         "This verification link is invalid or has expired. Please request a new one.",
                         ApiException.CODE_INVALID_TOKEN));
         user.setEmailVerified(true);
+        String account = user.getRole() == Enums.UserRole.OWNER ? "PG owner" : "customer";
+        Mail mail = Mail.of(user.getName(), user.getEmail(), "Welcome to PG-STAY.IN",
+                        "Your email address is verified and your " + account + " account is now active.",
+                        "You can sign in to " + (user.getRole() == Enums.UserRole.OWNER
+                                ? "register your PG and manage bookings and rent."
+                                : "find a PG, book a bed and pay your rent online."))
+                .withAction("Sign in", link("/signin"));
+        AfterCommit.run(() -> mailService.sendAsync(mail));
         return new MessageResponse("Your email address is verified. You can sign in now.");
     }
 

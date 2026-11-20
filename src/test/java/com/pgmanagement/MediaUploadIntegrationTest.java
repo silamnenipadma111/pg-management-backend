@@ -11,7 +11,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.RequestBuilder;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -86,7 +86,7 @@ class MediaUploadIntegrationTest {
         mvc.perform(upload(support, "room.png", PNG)).andExpect(status().isOk());
     }
 
-    private static MockHttpServletRequestBuilder upload(Session session, String fileName, byte[] bytes) {
+    private static RequestBuilder upload(Session session, String fileName, byte[] bytes) {
         return multipart(UPLOAD_URL).file(new MockMultipartFile("file", fileName, "application/octet-stream", bytes))
                 .cookie(session.cookie()).header(ApiClient.CSRF_HEADER, session.csrfToken());
     }
