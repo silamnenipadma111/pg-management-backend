@@ -39,7 +39,7 @@ public class PgService {
 
         Stream<Pg> stream = pgs.stream()
                 .filter(textMatches(c.q()))
-                .filter(p -> isBlank(c.city()) || p.getCity().equalsIgnoreCase(c.city().trim()))
+                .filter(p -> isBlank(c.city()) || containsEitherWay(p.getCity(), c.city().trim()))
                 .filter(p -> c.gender() == null || p.getGenderPreference() == c.gender())
                 .filter(p -> p.getRooms().stream().anyMatch(roomMatches(c)));
 
@@ -63,6 +63,16 @@ public class PgService {
         return p -> Stream.of(p.getName(), p.getArea(), p.getCity(), p.getAddressLine(), p.getPincode(), p.getState())
                 .filter(Objects::nonNull)
                 .anyMatch(v -> v.toLowerCase(Locale.ROOT).contains(needle));
+    }
+
+    /** City names vary ("Pune" vs "Pune City Subdistrict") - match when either contains the other. */
+    private static boolean containsEitherWay(String value, String needle) {
+        if (value == null) {
+            return false;
+        }
+        String v = value.toLowerCase(Locale.ROOT);
+        String n = needle.toLowerCase(Locale.ROOT);
+        return v.contains(n) || n.contains(v);
     }
 
     private static Predicate<Room> roomMatches(SearchCriteria c) {
