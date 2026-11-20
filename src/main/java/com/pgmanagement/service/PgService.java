@@ -21,6 +21,11 @@ import java.util.stream.Stream;
 public class PgService {
 
     private static final String BED_LABELS = "ABCDEFGHIJKL";
+    private static final String SORT_DISTANCE = "DISTANCE";
+    /** Bookings that became a real stay. */
+    private static final Set<Enums.BookingStatus> STAYED = EnumSet.of(Enums.BookingStatus.BOOKED,
+            Enums.BookingStatus.COMPLETED);
+    private static final int MAX_PREVIOUS_STAYS = 6;
 
     private final PgRepository pgRepository;
     private final BedRepository bedRepository;
@@ -68,17 +73,17 @@ public class PgService {
     }
 
     private static List<PgSummaryDto> sort(List<PgSummaryDto> list, String sort, boolean hasLocation) {
-        Comparator<PgSummaryDto> cmp;
-        String key = sort == null ? (hasLocation ? "DISTANCE" : "RECOMMENDED") : sort.toUpperCase(Locale.ROOT);
-        switch (key) {
-            case "PRICE_ASC" -> cmp = Comparator.comparing(PgSummaryDto::minRent);
-            case "PRICE_DESC" -> cmp = Comparator.comparing(PgSummaryDto::minRent).reversed();
-            case "AVAILABILITY" -> cmp = Comparator.comparingLong(PgSummaryDto::availableBeds).reversed();
-            case "DISTANCE" -> cmp = Comparator.comparing(PgSummaryDto::distanceKm,
+        String defaultKey = hasLocation ? SORT_DISTANCE : "RECOMMENDED";
+        String key = isBlank(sort) ? defaultKey : sort.trim().toUpperCase(Locale.ROOT);
+        Comparator<PgSummaryDto> cmp = switch (key) {
+            case "PRICE_ASC" -> Comparator.comparing(PgSummaryDto::minRent);
+            case "PRICE_DESC" -> Comparator.comparing(PgSummaryDto::minRent).reversed();
+            case "AVAILABILITY" -> Comparator.comparingLong(PgSummaryDto::availableBeds).reversed();
+            case SORT_DISTANCE -> Comparator.comparing(PgSummaryDto::distanceKm,
                     Comparator.nullsLast(Comparator.naturalOrder()));
-            default -> cmp = Comparator.comparingLong(PgSummaryDto::availableBeds).reversed()
+            default -> Comparator.comparingLong(PgSummaryDto::availableBeds).reversed()
                     .thenComparing(PgSummaryDto::id);
-        }
+        };
         return list.stream().sorted(cmp).toList();
     }
 
@@ -113,6 +118,27 @@ public class PgService {
     @Transactional(readOnly = true)
     public PgDetailDto ownerPg(Long ownerId, Long pgId) {
         return DtoMapper.toDetail(findOwned(ownerId, pgId));
+    }
+
+    /**
+     * PGs the customer has stayed at (or is staying at), most recent first - shown as "book again" suggestions.
+     */
+    @Transactional(readOnly = true)
+    public List<PreviousStayDto> previousStays(Long customerId) {
+        Map<Long, List<Booking>> byPg = new LinkedHashMap<>();
+        for (Booking booking : bookingRepository.findByCustomerIdAndStatusInOrderByStartDateDesc(customerId, STAYED)) {
+            if (booking.getPg().isActive()) {
+                byPg.computeIfAbsent(booking.getPg().getId(), id -> new ArrayList<>()).add(booking);
+            }
+        }
+        Map<Long, long[]> counts = bedCounts(List.copyOf(byPg.keySet()));
+        return byPg.values().stream().limit(MAX_PREVIOUS_STAYS).map(stays -> {
+            Booking latest = stays.get(0);
+            Pg pg = latest.getPg();
+            long[] beds = counts.getOrDefault(pg.getId(), new long[2]);
+            return new PreviousStayDto(DtoMapper.toSummary(pg, beds[0], beds[1], null), latest.getStartDate(),
+                    stays.size());
+        }).toList();
     }
 
     @Transactional
@@ -201,6 +227,7 @@ public class PgService {
         pg.setGenderPreference(req.genderPreference());
         pg.setFacilities(DtoMapper.joinFacilities(req.facilities()));
         pg.setContactPhone(req.contactPhone().trim());
+        pg.setUpiId(req.upiId() == null || req.upiId().isBlank() ? null : req.upiId().trim());
         pg.setHouseRules(req.houseRules());
         pg.getMedia().clear();
         int order = 0;

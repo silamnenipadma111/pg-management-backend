@@ -13,6 +13,9 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByCustomerIdOrderByCreatedAtDesc(Long customerId);
 
+    List<Booking> findByCustomerIdAndStatusInOrderByStartDateDesc(Long customerId,
+                                                                 Collection<Enums.BookingStatus> statuses);
+
     boolean existsByBedId(Long bedId);
 
     @Query("select b from Booking b where b.pg.owner.id = :ownerId and (:pgId is null or b.pg.id = :pgId) "

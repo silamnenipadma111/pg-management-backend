@@ -38,6 +38,10 @@ public class User {
     @Column(length = 10)
     private Enums.Gender gender;
 
+    /** False until the owner of the mailbox opened the verification link (when verification is required). */
+    @Column(nullable = false)
+    private boolean emailVerified = true;
+
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 }

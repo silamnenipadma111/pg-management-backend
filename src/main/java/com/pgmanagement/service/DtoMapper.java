@@ -20,7 +20,8 @@ public final class DtoMapper {
     }
 
     public static UserDto toUserDto(User u) {
-        return new UserDto(u.getId(), u.getName(), u.getEmail(), u.getPhone(), u.getRole(), u.getGender());
+        return new UserDto(u.getId(), u.getName(), u.getEmail(), u.getPhone(), u.getRole(), u.getGender(),
+                u.isEmailVerified());
     }
 
     public static CustomerInfo toCustomerInfo(User u) {
@@ -73,7 +74,7 @@ public final class DtoMapper {
         List<MediaDto> media = pg.getMedia().stream().map(m -> new MediaDto(m.getMediaType(), m.getUrl())).toList();
         return new PgDetailDto(pg.getId(), pg.getName(), pg.getDescription(), pg.getAddressLine(), pg.getArea(),
                 pg.getCity(), pg.getState(), pg.getPincode(), pg.getLatitude(), pg.getLongitude(),
-                pg.getGenderPreference(), splitFacilities(pg.getFacilities()), pg.getContactPhone(),
+                pg.getGenderPreference(), splitFacilities(pg.getFacilities()), pg.getContactPhone(), pg.getUpiId(),
                 pg.getHouseRules(), pg.getOwner().getName(), pg.getRegisteredVia(), media, minRent(pg), maxRent(pg),
                 sharingTypes(pg), available, total, floors);
     }
@@ -108,9 +109,10 @@ public final class DtoMapper {
         boolean overdue = p.getStatus() == Enums.PaymentStatus.DUE && p.getDueDate().isBefore(LocalDate.now());
         return new PaymentDto(p.getId(), b.getId(), p.getInstallmentNo(), b.getPayments().size(), p.getAmount(),
                 p.getDueDate(), p.getPeriodStart(), p.getPeriodEnd(), p.getStatus(), overdue, p.getPaymentMethod(),
-                p.getTransactionRef(), p.getOwnerNote(), p.getSubmittedAt(), p.getPaidAt(), p.getInvoiceNumber(),
-                b.getPg().getId(), b.getPg().getName(), bed.getRoom().getRoomNumber(), bed.getBedLabel(),
-                b.getBookingType(), b.getStatus(), toCustomerInfo(b.getCustomer()));
+                p.getTransactionRef(), p.getPaymentDetails(), p.getOwnerNote(), p.getSubmittedAt(), p.getPaidAt(),
+                p.getInvoiceNumber(), b.getPg().getId(), b.getPg().getName(), bed.getRoom().getRoomNumber(),
+                bed.getBedLabel(), b.getBookingType(), b.getStatus(), toCustomerInfo(b.getCustomer()),
+                p.getLastReminderOn());
     }
 
     public static NotificationDto toNotificationDto(Notification n) {

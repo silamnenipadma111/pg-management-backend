@@ -58,8 +58,34 @@ Local Oracle for development: `docker run -d -p 1521:1521 -e ORACLE_PASSWORD=<pw
 ## Booking / payment flow
 1. Customer requests a bed (`POST /api/bookings`) -> booking `REQUESTED`, bed `BLOCKED`, owner notified with customer contact details.
 2. Owner approves (`POST /api/owner/bookings/{id}/approve`) -> rent installments generated; or rejects -> bed `AVAILABLE` again.
-3. Customer pays an installment (`POST /api/payments/{id}/pay`) -> payment `SUBMITTED`, owner notified.
-4. Owner accepts (`POST /api/owner/payments/{id}/confirm`) -> payment `PAID`, invoice number issued; on the first payment booking + bed become `BOOKED`.
+3. Customer pays the **next** installment (only one per booking is shown as upcoming):
+   - **Online (UPI / card / net banking)**: `POST /api/payments/{id}/checkout` returns an order id (and for UPI a
+     `upi://pay?pa=<PG UPI ID>&am=...` link that the website opens in Google Pay / PhonePe / Paytm / BHIM), then
+     `POST /api/payments/{id}/complete` -> payment `PAID`, invoice issued, booking + bed `BOOKED`, owner notified.
+     Only card last 4 digits / network are sent, never the full number or CVV.
+   - **Cash**: `POST /api/payments/{id}/cash` (paid on, received by) -> payment `SUBMITTED`, owner notified;
+     owner accepts (`POST /api/owner/payments/{id}/confirm`) -> `PAID` + bed `BOOKED`, or rejects -> `DUE` again.
+4. Rent reminders: every day at 9 AM IST (and once at startup) the next unpaid installment of each active booking is
+   checked; reminders go out 3 days before, 1 day before, on the due date and every 3 days while overdue - on the
+   website and by Email / SMS / WhatsApp. Owners can also send one now: `POST /api/owner/payments/{id}/remind`.
+
+> **Demo payment gateway**: a UPI payment made inside a UPI app cannot be verified by the website itself, so
+> `/complete` trusts the customer's confirmation. For real money, verify the order with a payment gateway
+> (Razorpay, Cashfree, PhonePe PG, ...) in `BookingService.verifyWithGateway`. The seeded PGs use placeholder
+> `*.demo@pgstay` UPI IDs (not a real bank handle) - set a real one via *Edit PG*.
+
+### Email / SMS / WhatsApp
+| Variable | |
+|---|---|
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM` | SMTP. Gmail: `smtp.gmail.com`, port 587, your Gmail address and an App Password |
+| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | Twilio account used for SMS and WhatsApp |
+| `TWILIO_SMS_FROM` | Twilio phone number for SMS, e.g. `+1415...` |
+| `TWILIO_WHATSAPP_FROM` | WhatsApp sender, e.g. `whatsapp:+14155238886` (Twilio sandbox) |
+| `SITE_URL` | link appended to messages |
+| `REMINDERS_ENABLED`, `REMINDERS_CRON`, `REMINDERS_DAYS_BEFORE` (`3,1,0`), `REMINDERS_OVERDUE_EVERY_DAYS`, `REMINDERS_RUN_ON_STARTUP` | reminder schedule |
+
+Channels that are not configured are skipped and the message is written to the log (`[messaging disabled] ...`).
+Existing Oracle databases: run `db/oracle/04_migration_payments_reminders.sql`.
 
 Booking types: `DAILY`, `WEEKLY` (one payment), `MONTHLY` (monthly installments), `YEARLY` (one yearly
 payment or `paymentPlan=MONTHLY` for 12 monthly installments per year).
@@ -69,8 +95,8 @@ payment or `paymentPlan=MONTHLY` for 12 monthly installments per year).
 |---|---|
 | Auth | `POST /api/auth/signup`, `POST /api/auth/signin` (email, password, role), `GET /api/auth/me` |
 | Public | `GET /api/pgs?lat&lng&radiusKm&q&city&sharing&minRent&maxRent&gender&ac&sort` (sort = DISTANCE, PRICE_ASC, PRICE_DESC, AVAILABILITY), `GET /api/pgs/{id}`, `GET /api/meta/options`, `POST /api/support/requests` |
-| Customer | `POST /api/bookings`, `GET /api/bookings/my`, `POST /api/bookings/{id}/cancel`, `GET /api/payments/my?scope=upcoming\|history`, `POST /api/payments/{id}/pay`, `GET /api/payments/{id}/invoice` |
-| Owner | `GET/POST /api/owner/pgs`, `GET/PUT /api/owner/pgs/{id}`, `PATCH /api/owner/beds/{id}/status`, `GET /api/owner/dashboard`, `GET /api/owner/bookings?pgId&status`, `POST /api/owner/bookings/{id}/approve\|reject`, `GET /api/owner/payments?pgId&status`, `POST /api/owner/payments/{id}/confirm\|reject` |
+| Customer | `POST /api/bookings`, `GET /api/bookings/my`, `POST /api/bookings/{id}/cancel`, `GET /api/payments/my?scope=upcoming\|history`, `POST /api/payments/{id}/checkout\|complete\|cash`, `GET /api/payments/{id}/invoice` |
+| Owner | `GET/POST /api/owner/pgs`, `GET/PUT /api/owner/pgs/{id}`, `PATCH /api/owner/beds/{id}/status`, `GET /api/owner/dashboard`, `GET /api/owner/bookings?pgId&status`, `POST /api/owner/bookings/{id}/approve\|reject`, `GET /api/owner/payments?pgId&status`, `POST /api/owner/payments/{id}/confirm\|reject\|remind` |
 | Support | `GET /api/support/requests`, `POST /api/support/requests/{id}/resolve`, `POST /api/support/pgs` (register PG for an owner) |
 | Common | `POST /api/media/upload` (owner/support), `GET /api/notifications`, `POST /api/notifications/{id}/read`, `POST /api/notifications/read-all` |
 

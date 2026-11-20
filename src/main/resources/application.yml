@@ -12,20 +12,76 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 60MB
-  jackson:
-    serialization:
-      write-dates-as-timestamps: false
+  # Outgoing HTTP calls (Twilio, address lookup) must never hang a request thread.
+  http:
+    clients:
+      connect-timeout: 4s
+      read-timeout: 8s
 
 server:
   port: ${PORT:8080}
+  # Behind nginx/HTTPS: honour X-Forwarded-Proto/Host so Spring sees the real https origin (needed for CORS checks).
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-stacktrace: never
 
 app:
-  jwt:
-    secret: ${JWT_SECRET:change-me-pg-management-dev-secret}
-    expiration-ms: 86400000
-  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200}
+  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://127.0.0.1:4200,https://pg-stay.in,https://www.pg-stay.in}
   upload-dir: ${UPLOAD_DIR:./uploads}
   seed-mock-data: ${SEED_MOCK_DATA:true}
+  # Base URL of the website, used for the links in emails (verify email, reset password, view booking ...).
+  public-url: ${PUBLIC_URL:http://localhost:4200}
+  # Business mailbox for enquiries; enquiries from the website are forwarded here and it is the reply-to of all mail.
+  support-email: ${SUPPORT_EMAIL:support@pg-stay.in}
+  auth:
+    session-ttl: ${SESSION_TTL:12h}
+    idle-timeout: ${SESSION_IDLE_TIMEOUT:2h}
+    cookie-secure: ${SESSION_COOKIE_SECURE:true}
+    cookie-same-site: ${SESSION_COOKIE_SAME_SITE:Strict}
+    # auto = new accounts must confirm their email whenever outgoing mail (MAIL_HOST) is configured
+    require-email-verification: ${REQUIRE_EMAIL_VERIFICATION:auto}
+    max-failed-attempts: ${LOGIN_MAX_FAILED_ATTEMPTS:5}
+    lock-duration: ${LOGIN_LOCK_DURATION:15m}
+    bcrypt-strength: ${BCRYPT_STRENGTH:12}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:true}
+  # "Use my current location" and pincode auto-fill. Results are cached; the provider is OpenStreetMap Nominatim.
+  geocoding:
+    enabled: ${GEOCODING_ENABLED:true}
+    base-url: ${GEOCODING_BASE_URL:https://nominatim.openstreetmap.org}
+    pincode-fallback-url: ${PINCODE_FALLBACK_URL:https://api.postalpincode.in}
+    user-agent: ${GEOCODING_USER_AGENT:PG-Stay/1.0 (https://pg-stay.in)}
+  # Email / SMS / WhatsApp notifications and rent due reminders. Unconfigured channels are skipped (logged only).
+  messaging:
+    site-url: ${SITE_URL:http://localhost:4200/my-rents}
+    email-from: ${MAIL_FROM:${MAIL_USERNAME:}}
+    twilio:
+      account-sid: ${TWILIO_ACCOUNT_SID:}
+      auth-token: ${TWILIO_AUTH_TOKEN:}
+      sms-from: ${TWILIO_SMS_FROM:}
+      whatsapp-from: ${TWILIO_WHATSAPP_FROM:}
+    reminders:
+      enabled: ${REMINDERS_ENABLED:true}
+      run-on-startup: ${REMINDERS_RUN_ON_STARTUP:true}
+      cron: ${REMINDERS_CRON:0 0 9 * * *}
+      zone: Asia/Kolkata
+      days-before: ${REMINDERS_DAYS_BEFORE:3,1,0}
+      overdue-every-days: ${REMINDERS_OVERDUE_EVERY_DAYS:3}
+
+# Email via SMTP. For the business mailbox use the SMTP host of your mail provider with the mailbox user
+# (e.g. support@pg-stay.in) and its password / app password. The mail sender is used only when MAIL_HOST is set.
+spring.mail:
+  host: ${MAIL_HOST:}
+  port: ${MAIL_PORT:587}
+  username: ${MAIL_USERNAME:}
+  password: ${MAIL_PASSWORD:}
+  properties:
+    mail.smtp.auth: true
+    mail.smtp.starttls.enable: true
+    mail.smtp.connectiontimeout: 10000
+    mail.smtp.timeout: 10000
+    mail.smtp.writetimeout: 10000
 
 ---
 # Default: in-memory H2 (Oracle compatibility mode) seeded from src/main/resources/mock-data/*.json
@@ -43,3 +99,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+app:
+  auth:
+    # http://localhost has no TLS, so the session cookie cannot be marked Secure during development
+    cookie-secure: ${SESSION_COOKIE_SECURE:false}

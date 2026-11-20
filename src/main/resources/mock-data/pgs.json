@@ -24,6 +24,7 @@
       "CCTV"
     ],
     "contactPhone": "9876543210",
+    "upiId": "ravikumar.demo@pgstay",
     "houseRules": "Gate closes at 11 PM. No smoking or alcohol inside premises. Visitors allowed till 8 PM.",
     "floors": [
       {
@@ -185,6 +186,7 @@
       "POWER_BACKUP"
     ],
     "contactPhone": "9876543210",
+    "upiId": "ravikumar.demo@pgstay",
     "houseRules": "Maintain silence after 10 PM. Keep the kitchen clean after use.",
     "floors": [
       {
@@ -347,6 +349,7 @@
       "DRINKING_WATER"
     ],
     "contactPhone": "9876543211",
+    "upiId": "lakshmireddy.demo@pgstay",
     "houseRules": "Entry closes at 10 PM. Male visitors only in the lobby.",
     "floors": [
       {
@@ -501,6 +504,7 @@
       "DRINKING_WATER"
     ],
     "contactPhone": "9876543211",
+    "upiId": "lakshmireddy.demo@pgstay",
     "houseRules": "No loud music. Rent due by 5th of every month.",
     "floors": [
       {
@@ -637,6 +641,7 @@
       "PARKING"
     ],
     "contactPhone": "9876543210",
+    "upiId": "ravikumar.demo@pgstay",
     "houseRules": "ID proof mandatory at check-in.",
     "floors": [
       {
@@ -770,6 +775,7 @@
       "LIFT"
     ],
     "contactPhone": "9876543211",
+    "upiId": "lakshmireddy.demo@pgstay",
     "houseRules": "Quiet hours 11 PM to 7 AM.",
     "floors": [
       {
@@ -927,6 +933,7 @@
       "CCTV"
     ],
     "contactPhone": "9876543210",
+    "upiId": "ravikumar.demo@pgstay",
     "houseRules": "Entry till 10:30 PM. Inform warden for late arrivals.",
     "floors": [
       {
@@ -1046,6 +1053,7 @@
       "PARKING"
     ],
     "contactPhone": "9876543211",
+    "upiId": "lakshmireddy.demo@pgstay",
     "houseRules": "No pets. Rent due by 5th.",
     "floors": [
       {
@@ -1153,6 +1161,173 @@
         "mediaType": "IMAGE",
         "url": "https://images.unsplash.com/photo-1540518614846-7eded433c457?w=1200&q=70"
       }
+    ]
+  }
+,
+  {
+    "ownerEmail": "owner@pgstay.in",
+    "name": "Hinjewadi IT Hub Men's PG",
+    "area": "Hinjewadi Phase 1",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pincode": "411057",
+    "latitude": 18.5913,
+    "longitude": 73.7389,
+    "genderPreference": "MALE",
+    "addressLine": "Plot 18, Shivaji Chowk, Near Wipro Circle",
+    "description": "Walking distance to Rajiv Gandhi Infotech Park. Veg & non-veg food, high speed Wi-Fi and company shuttle pickup point at the gate.",
+    "facilities": ["FOOD", "WIFI", "WASHING_MACHINE", "CLEANING", "AC", "NON_AC", "HOT_WATER", "POWER_BACKUP", "PARKING", "CCTV"],
+    "contactPhone": "9876543210",
+    "upiId": "ravikumar.demo@pgstay",
+    "houseRules": "Gate closes at 11:30 PM. No smoking inside rooms. Rent due by 5th of every month.",
+    "floors": [
+      {
+        "floorNumber": 1,
+        "rooms": [
+          { "roomNumber": "101", "sharingType": 2, "ac": true, "attachedBathroom": true, "dailyRent": 550, "monthlyRent": 12000 },
+          { "roomNumber": "102", "sharingType": 3, "ac": false, "attachedBathroom": true, "dailyRent": 400, "monthlyRent": 8500 },
+          { "roomNumber": "103", "sharingType": 1, "ac": true, "attachedBathroom": true, "dailyRent": 750, "monthlyRent": 16500 }
+        ]
+      },
+      {
+        "floorNumber": 2,
+        "rooms": [
+          { "roomNumber": "201", "sharingType": 2, "ac": false, "attachedBathroom": true, "dailyRent": 480, "monthlyRent": 10500 },
+          { "roomNumber": "202", "sharingType": 3, "ac": true, "attachedBathroom": true, "dailyRent": 450, "monthlyRent": 9500 },
+          { "roomNumber": "203", "sharingType": 4, "ac": false, "attachedBathroom": false, "dailyRent": 330, "monthlyRent": 7000, "unavailableBeds": ["D"] }
+        ]
+      }
+    ],
+    "media": [
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=1200&q=70" }
+    ]
+  },
+  {
+    "ownerEmail": "owner2@pgstay.in",
+    "name": "Kharadi Co-Living Spaces",
+    "area": "Kharadi",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pincode": "411014",
+    "latitude": 18.5515,
+    "longitude": 73.9471,
+    "genderPreference": "ANY",
+    "addressLine": "Survey No 45, Near EON IT Park, Kharadi Bypass Road",
+    "description": "Premium co-living next to EON IT Park and World Trade Center with gym, work lounge, self cooking kitchen and housekeeping.",
+    "facilities": ["WIFI", "WASHING_MACHINE", "CLEANING", "AC", "SELF_COOKING", "FRIDGE", "GYM", "LIFT", "PARKING", "POWER_BACKUP", "SECURITY"],
+    "contactPhone": "9876543211",
+    "upiId": "lakshmireddy.demo@pgstay",
+    "houseRules": "Quiet hours 11 PM to 7 AM. Guests allowed in the common lounge till 9 PM.",
+    "floors": [
+      {
+        "floorNumber": 1,
+        "rooms": [
+          { "roomNumber": "101", "sharingType": 1, "ac": true, "attachedBathroom": true, "dailyRent": 900, "monthlyRent": 19500 },
+          { "roomNumber": "102", "sharingType": 2, "ac": true, "attachedBathroom": true, "dailyRent": 650, "monthlyRent": 14000 },
+          { "roomNumber": "103", "sharingType": 2, "ac": true, "attachedBathroom": true, "dailyRent": 650, "monthlyRent": 14000 }
+        ]
+      },
+      {
+        "floorNumber": 2,
+        "rooms": [
+          { "roomNumber": "201", "sharingType": 3, "ac": true, "attachedBathroom": true, "dailyRent": 520, "monthlyRent": 11000 },
+          { "roomNumber": "202", "sharingType": 1, "ac": true, "attachedBathroom": true, "dailyRent": 900, "monthlyRent": 19500 },
+          { "roomNumber": "203", "sharingType": 2, "ac": false, "attachedBathroom": true, "dailyRent": 560, "monthlyRent": 12000 }
+        ]
+      },
+      {
+        "floorNumber": 3,
+        "rooms": [
+          { "roomNumber": "301", "sharingType": 3, "ac": false, "attachedBathroom": false, "dailyRent": 430, "monthlyRent": 9000 },
+          { "roomNumber": "302", "sharingType": 2, "ac": true, "attachedBathroom": true, "dailyRent": 650, "monthlyRent": 14000 }
+        ]
+      }
+    ],
+    "media": [
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&q=70" }
+    ]
+  },
+  {
+    "ownerEmail": "owner2@pgstay.in",
+    "name": "Viman Nagar Ladies PG",
+    "area": "Viman Nagar",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pincode": "411014",
+    "latitude": 18.5679,
+    "longitude": 73.9143,
+    "genderPreference": "FEMALE",
+    "addressLine": "Lane 7, Behind Phoenix Marketcity, Nagar Road",
+    "description": "Safe ladies PG near Symbiosis and Phoenix Marketcity with biometric entry, 24x7 warden and home style Maharashtrian & South Indian food.",
+    "facilities": ["FOOD", "WIFI", "LAUNDRY", "CLEANING", "AC", "NON_AC", "HOT_WATER", "CCTV", "SECURITY", "DRINKING_WATER"],
+    "contactPhone": "9876543211",
+    "upiId": "lakshmireddy.demo@pgstay",
+    "houseRules": "Entry till 10:30 PM. Male visitors only in the reception area. Inform the warden for late arrivals.",
+    "floors": [
+      {
+        "floorNumber": 0,
+        "rooms": [
+          { "roomNumber": "G01", "sharingType": 2, "ac": false, "attachedBathroom": true, "dailyRent": 460, "monthlyRent": 9800 },
+          { "roomNumber": "G02", "sharingType": 3, "ac": false, "attachedBathroom": false, "dailyRent": 380, "monthlyRent": 8000 }
+        ]
+      },
+      {
+        "floorNumber": 1,
+        "rooms": [
+          { "roomNumber": "101", "sharingType": 1, "ac": true, "attachedBathroom": true, "dailyRent": 700, "monthlyRent": 15000 },
+          { "roomNumber": "102", "sharingType": 2, "ac": true, "attachedBathroom": true, "dailyRent": 560, "monthlyRent": 12000 },
+          { "roomNumber": "103", "sharingType": 3, "ac": true, "attachedBathroom": true, "dailyRent": 470, "monthlyRent": 10000 }
+        ]
+      }
+    ],
+    "media": [
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=1200&q=70" }
+    ]
+  },
+  {
+    "ownerEmail": "owner@pgstay.in",
+    "name": "Baner Green Residency",
+    "area": "Baner",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pincode": "411045",
+    "latitude": 18.559,
+    "longitude": 73.7868,
+    "genderPreference": "ANY",
+    "addressLine": "Baner Road, Opp. Balewadi High Street",
+    "description": "Budget friendly co-living on Baner Road close to Balewadi High Street and the Pune-Bangalore highway. Ideal for students and freshers.",
+    "facilities": ["FOOD", "WIFI", "WASHING_MACHINE", "CLEANING", "NON_AC", "FRIDGE", "TV", "HOT_WATER", "DRINKING_WATER"],
+    "contactPhone": "9876543210",
+    "upiId": "ravikumar.demo@pgstay",
+    "houseRules": "ID proof mandatory at check-in. No loud music after 10 PM.",
+    "floors": [
+      {
+        "floorNumber": 1,
+        "rooms": [
+          { "roomNumber": "101", "sharingType": 3, "ac": false, "attachedBathroom": true, "dailyRent": 330, "monthlyRent": 7000 },
+          { "roomNumber": "102", "sharingType": 4, "ac": false, "attachedBathroom": false, "dailyRent": 280, "monthlyRent": 6000 },
+          { "roomNumber": "103", "sharingType": 2, "ac": false, "attachedBathroom": true, "dailyRent": 400, "monthlyRent": 8500 }
+        ]
+      },
+      {
+        "floorNumber": 2,
+        "rooms": [
+          { "roomNumber": "201", "sharingType": 3, "ac": false, "attachedBathroom": true, "dailyRent": 330, "monthlyRent": 7000 },
+          { "roomNumber": "202", "sharingType": 2, "ac": true, "attachedBathroom": true, "dailyRent": 480, "monthlyRent": 10500 }
+        ]
+      }
+    ],
+    "media": [
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1564078516393-cf04bd966897?w=1200&q=70" },
+      { "mediaType": "IMAGE", "url": "https://images.unsplash.com/photo-1556020685-ae41abfc9365?w=1200&q=70" }
     ]
   }
 ]

@@ -60,6 +60,10 @@ public class Pg {
     @Column(nullable = false, length = 20)
     private String contactPhone;
 
+    /** Owner's UPI ID (VPA) that UPI app payments are sent to, e.g. name@okhdfcbank */
+    @Column(length = 100)
+    private String upiId;
+
     @Column(length = 2000)
     private String houseRules;
 

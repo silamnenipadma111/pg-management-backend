@@ -1,20 +1,24 @@
 package com.pgmanagement.config;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import com.pgmanagement.dto.BookingDtos.BookingRequest;
-import com.pgmanagement.dto.BookingDtos.PayRequest;
-import com.pgmanagement.dto.BookingDtos.PaymentDto;
+import com.pgmanagement.dto.BookingDtos.CashPaymentRequest;
+import com.pgmanagement.dto.BookingDtos.CheckoutRequest;
+import com.pgmanagement.dto.BookingDtos.CompletePaymentRequest;
 import com.pgmanagement.dto.PgDtos.*;
 import com.pgmanagement.entity.Enums;
 import com.pgmanagement.entity.Pg;
 import com.pgmanagement.entity.Room;
 import com.pgmanagement.entity.User;
+import com.pgmanagement.repository.BookingRepository;
 import com.pgmanagement.repository.PgRepository;
 import com.pgmanagement.repository.UserRepository;
 import com.pgmanagement.service.AuthService;
 import com.pgmanagement.service.BookingService;
+import com.pgmanagement.service.DemoAccounts;
 import com.pgmanagement.service.PgService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Loads demo data from classpath:mock-data/*.json when the database is empty.
+ * Loads demo data from classpath:mock-data/*.json when the database is empty (app.seed-mock-data=true).
  * Data is inserted through the regular services so every business rule applies.
  */
 @Slf4j
@@ -43,12 +47,15 @@ public class MockDataSeeder implements ApplicationRunner {
     private final AppProperties appProperties;
     private final UserRepository userRepository;
     private final PgRepository pgRepository;
+    private final BookingRepository bookingRepository;
     private final AuthService authService;
     private final PgService pgService;
     private final BookingService bookingService;
+    private final DemoAccounts demoAccounts;
 
-    private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final ObjectMapper mapper = JsonMapper.builder()
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .disable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES).build();
 
     record SeedUser(String name, String email, String phone, String password, Enums.UserRole role,
                     Enums.Gender gender) {
@@ -63,7 +70,7 @@ public class MockDataSeeder implements ApplicationRunner {
 
     record SeedPg(String ownerEmail, String name, String description, String addressLine, String area, String city,
                   String state, String pincode, Double latitude, Double longitude,
-                  Enums.GenderPreference genderPreference, List<String> facilities, String contactPhone,
+                  Enums.GenderPreference genderPreference, List<String> facilities, String contactPhone, String upiId,
                   String houseRules, List<MediaDto> media, List<SeedFloor> floors) {
     }
 
@@ -75,10 +82,15 @@ public class MockDataSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws IOException {
-        if (!appProperties.seedMockData() || userRepository.count() > 0) {
+        if (!appProperties.seedMockData()) {
             return;
         }
         List<SeedUser> users = read("users.json", new TypeReference<>() { });
+        // demo accounts use made-up addresses and phone numbers: never send them real emails or SMS
+        demoAccounts.register(users.stream().map(SeedUser::email).toList());
+        if (userRepository.count() > 0) {
+            return;
+        }
         for (SeedUser u : users) {
             authService.createUser(u.name(), u.email(), u.phone(), u.password(), u.role(), u.gender());
         }
@@ -110,15 +122,24 @@ public class MockDataSeeder implements ApplicationRunner {
         }
         Long ownerId = pg.getOwner().getId();
         bookingService.approve(ownerId, booking.id(), "Welcome!");
-        var payments = bookingService.myPayments(customer.getId(), "upcoming").stream()
-                .filter(p -> p.bookingId().equals(booking.id()))
-                .sorted(java.util.Comparator.comparingInt(PaymentDto::installmentNo)).toList();
-        if ("PAYMENT_SUBMITTED".equals(b.stage())) {
-            bookingService.pay(customer.getId(), payments.get(0).id(), new PayRequest("UPI", null));
+        bookingRepository.flush(); // assigns ids to the generated installments
+        List<Long> payments = bookingRepository.findById(booking.id()).orElseThrow().getPayments().stream()
+                .map(com.pgmanagement.entity.Payment::getId).toList();
+        if ("PAYMENT_SUBMITTED".equals(b.stage()) || "CASH_SUBMITTED".equals(b.stage())) {
+            bookingService.requestCashConfirmation(customer.getId(), payments.get(0),
+                    new CashPaymentRequest(LocalDate.now(), pg.getOwner().getName(), "Paid at the PG office"));
         } else if ("BOOKED".equals(b.stage())) {
             for (int i = 0; i < Math.max(1, b.paidInstallments()); i++) {
-                bookingService.pay(customer.getId(), payments.get(i).id(), new PayRequest("UPI", null));
-                bookingService.confirmPayment(ownerId, payments.get(i).id());
+                Long paymentId = payments.get(i);
+                if (i % 2 == 0) {
+                    var order = bookingService.checkout(customer.getId(), paymentId, new CheckoutRequest("CARD"));
+                    bookingService.completeOnline(customer.getId(), paymentId, new CompletePaymentRequest(
+                            order.orderId(), "CARD", null, null, null, "4242", "VISA", customer.getName(), null));
+                } else {
+                    bookingService.requestCashConfirmation(customer.getId(), paymentId,
+                            new CashPaymentRequest(LocalDate.now(), pg.getOwner().getName(), null));
+                    bookingService.confirmPayment(ownerId, paymentId);
+                }
             }
         }
     }
@@ -134,7 +155,7 @@ public class MockDataSeeder implements ApplicationRunner {
             }
         }
         return new PgRequest(p.name(), p.description(), p.addressLine(), p.area(), p.city(), p.state(), p.pincode(),
-                p.latitude(), p.longitude(), p.genderPreference(), p.facilities(), p.contactPhone(), p.houseRules(),
+                p.latitude(), p.longitude(), p.genderPreference(), p.facilities(), p.contactPhone(), p.upiId(), p.houseRules(),
                 p.media(), rooms);
     }
 

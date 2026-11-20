@@ -32,4 +32,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     long countByPgAndStatus(@Param("pgId") Long pgId, @Param("status") Enums.PaymentStatus status);
 
     long countByInvoiceNumberIsNotNull();
+
+    @Query("select p from Payment p where p.status = :status and p.booking.status in :bookingStatuses "
+            + "order by p.booking.id asc, p.installmentNo asc")
+    List<Payment> findByStatusForBookings(@Param("status") Enums.PaymentStatus status,
+                                          @Param("bookingStatuses") Collection<Enums.BookingStatus> bookingStatuses);
 }

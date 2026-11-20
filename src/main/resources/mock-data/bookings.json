@@ -51,5 +51,26 @@
     "duration": 2,
     "startOffsetDays": 3,
     "stage": "APPROVED"
+  },
+  {
+    "customerEmail": "customer2@pgstay.in",
+    "pgName": "Viman Nagar Ladies PG",
+    "roomNumber": "102",
+    "bedLabel": "A",
+    "bookingType": "MONTHLY",
+    "duration": 6,
+    "startOffsetDays": -28,
+    "stage": "BOOKED",
+    "paidInstallments": 1
+  },
+  {
+    "customerEmail": "customer@pgstay.in",
+    "pgName": "Kharadi Co-Living Spaces",
+    "roomNumber": "102",
+    "bedLabel": "B",
+    "bookingType": "MONTHLY",
+    "duration": 3,
+    "startOffsetDays": 4,
+    "stage": "APPROVED"
   }
 ]

@@ -12,3 +12,5 @@ spring:
 
 app:
   seed-mock-data: ${SEED_MOCK_DATA:false}
+  cors-allowed-origins: ${CORS_ALLOWED_ORIGINS:https://pg-stay.in,https://www.pg-stay.in}
+  public-url: ${PUBLIC_URL:https://pg-stay.in}

@@ -1,10 +1,12 @@
 package com.pgmanagement.dto;
 
 import com.pgmanagement.entity.Enums;
+import com.pgmanagement.validation.ValidationRules;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public final class PgDtos {
@@ -12,7 +14,7 @@ public final class PgDtos {
     private PgDtos() {
     }
 
-    public record MediaDto(@NotNull Enums.MediaType mediaType, @NotBlank String url) {
+    public record MediaDto(@NotNull Enums.MediaType mediaType, @NotBlank @Size(max = 1000) String url) {
     }
 
     public record BedDto(Long id, String bedLabel, Enums.BedStatus status) {
@@ -33,10 +35,14 @@ public final class PgDtos {
                                Double distanceKm, Double latitude, Double longitude) {
     }
 
+    /** A PG the customer has stayed at before ("book again" suggestion on the home page). */
+    public record PreviousStayDto(PgSummaryDto pg, LocalDate lastStayFrom, int stays) {
+    }
+
     public record PgDetailDto(Long id, String name, String description, String addressLine, String area,
                               String city, String state, String pincode, Double latitude, Double longitude,
                               Enums.GenderPreference genderPreference, List<String> facilities,
-                              String contactPhone, String houseRules, String ownerName,
+                              String contactPhone, String upiId, String houseRules, String ownerName,
                               Enums.RegisteredVia registeredVia, List<MediaDto> media, BigDecimal minRent,
                               BigDecimal maxRent, List<Integer> sharingTypes, long availableBeds, long totalBeds,
                               List<FloorDto> floors) {
@@ -54,9 +60,13 @@ public final class PgDtos {
             @NotNull @DecimalMin("0") BigDecimal dailyRent,
             @DecimalMin("0") BigDecimal weeklyRent,
             @NotNull @DecimalMin("1") BigDecimal monthlyRent,
-            @Valid List<BedRequest> beds) {
+            List<@Valid BedRequest> beds) {
     }
 
+    /**
+     * Latitude / longitude are optional: the website fills them from "use my current location" or from the
+     * pincode lookup; they are what makes a PG appear in "PGs near you".
+     */
     public record PgRequest(
             @NotBlank @Size(max = 150) String name,
             @Size(max = 2000) String description,
@@ -64,15 +74,16 @@ public final class PgDtos {
             @NotBlank @Size(max = 100) String area,
             @NotBlank @Size(max = 100) String city,
             @NotBlank @Size(max = 100) String state,
-            @NotBlank @Pattern(regexp = "^[0-9]{6}$", message = "must be a 6 digit pincode") String pincode,
+            @NotBlank @Pattern(regexp = ValidationRules.PINCODE, message = ValidationRules.PINCODE_MESSAGE) String pincode,
             @DecimalMin("-90") @DecimalMax("90") Double latitude,
             @DecimalMin("-180") @DecimalMax("180") Double longitude,
             @NotNull Enums.GenderPreference genderPreference,
             @NotEmpty List<String> facilities,
-            @NotBlank @Pattern(regexp = "^[0-9+ -]{10,15}$", message = "must be a valid phone number") String contactPhone,
+            @NotBlank @Pattern(regexp = ValidationRules.PHONE, message = ValidationRules.PHONE_MESSAGE) String contactPhone,
+            @Pattern(regexp = ValidationRules.UPI_ID, message = "must be a valid UPI ID like name@bank") String upiId,
             @Size(max = 2000) String houseRules,
-            @NotEmpty(message = "at least one image is required") @Valid List<MediaDto> media,
-            @NotEmpty(message = "at least one room is required") @Valid List<RoomRequest> rooms) {
+            @NotEmpty(message = "at least one image is required") List<@Valid MediaDto> media,
+            @NotEmpty(message = "at least one room is required") List<@Valid RoomRequest> rooms) {
     }
 
     public record BedStatusRequest(@NotNull Enums.BedStatus status) {

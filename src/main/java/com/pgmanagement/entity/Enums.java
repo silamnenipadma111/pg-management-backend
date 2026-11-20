@@ -28,4 +28,6 @@ public final class Enums {
     public enum SupportRequestType { CALLBACK, REGISTER_PG, GENERAL }
 
     public enum SupportRequestStatus { OPEN, RESOLVED }
+
+    public enum AuthTokenPurpose { EMAIL_VERIFICATION, PASSWORD_RESET }
 }

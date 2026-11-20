@@ -3,6 +3,7 @@ package com.pgmanagement.controller;
 import com.pgmanagement.dto.BookingDtos.BookingDto;
 import com.pgmanagement.dto.BookingDtos.NoteRequest;
 import com.pgmanagement.dto.BookingDtos.PaymentDto;
+import com.pgmanagement.dto.BookingDtos.ReminderResult;
 import com.pgmanagement.dto.DashboardDtos.OwnerDashboardDto;
 import com.pgmanagement.dto.PgDtos.BedStatusRequest;
 import com.pgmanagement.dto.PgDtos.PgDetailDto;
@@ -14,6 +15,7 @@ import com.pgmanagement.security.AuthUser;
 import com.pgmanagement.service.BookingService;
 import com.pgmanagement.service.DashboardService;
 import com.pgmanagement.service.PgService;
+import com.pgmanagement.service.ReminderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,7 @@ public class OwnerController {
     private final PgService pgService;
     private final BookingService bookingService;
     private final DashboardService dashboardService;
+    private final ReminderService reminderService;
     private final UserRepository userRepository;
 
     @GetMapping("/pgs")
@@ -96,6 +99,12 @@ public class OwnerController {
     @PostMapping("/payments/{id}/confirm")
     public PaymentDto confirmPayment(@AuthenticationPrincipal AuthUser user, @PathVariable Long id) {
         return bookingService.confirmPayment(user.id(), id);
+    }
+
+    /** Send the rent due reminder now (website + Email / SMS / WhatsApp). */
+    @PostMapping("/payments/{id}/remind")
+    public ReminderResult remind(@AuthenticationPrincipal AuthUser user, @PathVariable Long id) {
+        return reminderService.remindNow(user.id(), id);
     }
 
     @PostMapping("/payments/{id}/reject")

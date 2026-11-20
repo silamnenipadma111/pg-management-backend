@@ -1,6 +1,7 @@
 package com.pgmanagement.dto;
 
 import com.pgmanagement.entity.Enums;
+import com.pgmanagement.validation.ValidationRules;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,8 +22,8 @@ public final class CommonDtos {
 
     public record SupportRequestCreate(
             @NotBlank @Size(max = 100) String name,
-            @NotBlank @Pattern(regexp = "^[0-9+ -]{10,15}$", message = "must be a valid phone number") String phone,
-            @Email String email,
+            @NotBlank @Pattern(regexp = ValidationRules.PHONE, message = ValidationRules.PHONE_MESSAGE) String phone,
+            @Email @Size(max = ValidationRules.EMAIL_MAX) String email,
             @NotNull Enums.SupportRequestType requestType,
             @Size(max = 2000) String message) {
     }
@@ -34,8 +35,8 @@ public final class CommonDtos {
 
     public record AssistedPgRequest(
             @NotBlank @Size(max = 100) String ownerName,
-            @NotBlank @Email String ownerEmail,
-            @NotBlank @Pattern(regexp = "^[0-9+ -]{10,15}$", message = "must be a valid phone number") String ownerPhone,
+            @NotBlank @Email @Size(max = ValidationRules.EMAIL_MAX) String ownerEmail,
+            @NotBlank @Pattern(regexp = ValidationRules.PHONE, message = ValidationRules.PHONE_MESSAGE) String ownerPhone,
             Long supportRequestId,
             @NotNull @Valid PgDtos.PgRequest pg) {
     }
@@ -45,5 +46,13 @@ public final class CommonDtos {
     }
 
     public record UploadResponse(String url, Enums.MediaType mediaType) {
+    }
+
+    /**
+     * Address resolved from coordinates ("use my current location") or from a pincode.
+     * Any field can be null when the provider does not know it.
+     */
+    public record AddressDto(String addressLine, String area, String city, String state, String pincode,
+                             Double latitude, Double longitude) {
     }
 }

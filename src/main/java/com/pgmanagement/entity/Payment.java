@@ -58,4 +58,15 @@ public class Payment {
 
     @Column(unique = true, length = 40)
     private String invoiceNumber;
+
+    /** Order id issued at checkout; completing an online payment must reference it. */
+    @Column(length = 40)
+    private String gatewayOrderId;
+
+    /** Human readable payment details, e.g. "Google Pay - name@okaxis" or "VISA **** 4242". */
+    @Column(length = 200)
+    private String paymentDetails;
+
+    /** Date the last due-date reminder was sent for this installment (prevents duplicate reminders). */
+    private LocalDate lastReminderOn;
 }
