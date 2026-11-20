@@ -35,6 +35,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -166,7 +167,7 @@ class AuthServiceTest {
 
     @Test
     void anEmailAddressCanOnlyBeRegisteredOnce() {
-        when(userRepository.existsByEmailIgnoreCase(EMAIL)).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCaseAndRole(EMAIL, UserRole.CUSTOMER)).thenReturn(true);
         AuthService service = service(NO_VERIFY);
         SignupRequest request = new SignupRequest("Anil Varma", EMAIL, PHONE, PASSWORD, UserRole.CUSTOMER, null);
 
@@ -206,8 +207,8 @@ class AuthServiceTest {
 
     @Test
     void createUserNormalisesTheAddressAndRefusesDuplicates() {
-        when(userRepository.existsByEmailIgnoreCase("Owner@Example.com")).thenReturn(false);
-        when(userRepository.existsByEmailIgnoreCase("taken@example.com")).thenReturn(true);
+        when(userRepository.existsByEmailIgnoreCaseAndRole("Owner@Example.com", UserRole.OWNER)).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCaseAndRole("taken@example.com", UserRole.OWNER)).thenReturn(true);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         AuthService service = service(VERIFY);
 
@@ -265,9 +266,9 @@ class AuthServiceTest {
     @Test
     void resendVerificationAnswersTheSameWayWhenNothingIsSent() {
         AuthService service = service(VERIFY);
-        when(userRepository.findByEmailIgnoreCase("unknown@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findAllByEmailIgnoreCase("unknown@example.com")).thenReturn(List.of());
         User verified = Fixtures.user(8L, UserRole.OWNER, "Ravi Kumar", "ravi@example.com");
-        when(userRepository.findByEmailIgnoreCase(verified.getEmail())).thenReturn(Optional.of(verified));
+        when(userRepository.findAllByEmailIgnoreCase(verified.getEmail())).thenReturn(List.of(verified));
         User justMailed = existingUser(UserRole.CUSTOMER, false);
         when(tokenService.issuedWithin(eq(justMailed), eq(AuthTokenPurpose.EMAIL_VERIFICATION), any())).thenReturn(true);
 
@@ -314,7 +315,7 @@ class AuthServiceTest {
 
     @Test
     void anUnknownEmailFailsLikeAWrongPasswordAndStillChecksAHash() {
-        when(userRepository.findByEmailIgnoreCase("nobody@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findAllByEmailIgnoreCase("nobody@example.com")).thenReturn(List.of());
         AuthService service = service(VERIFY);
         SigninRequest request = new SigninRequest("nobody@example.com", PASSWORD, UserRole.CUSTOMER);
 
@@ -341,16 +342,15 @@ class AuthServiceTest {
     }
 
     @Test
-    void signingInWithTheWrongRoleExplainsWhichRoleTheAccountHas() {
+    void signingInWithTheWrongRoleFailsLikeAnUnknownAccount() {
         existingUser(UserRole.OWNER, true);
         AuthService service = service(VERIFY);
         SigninRequest request = new SigninRequest(EMAIL, PASSWORD, UserRole.CUSTOMER);
 
         assertThatThrownBy(() -> service.signin(request, IP, USER_AGENT, null))
-                .isInstanceOf(BadCredentialsException.class)
-                .hasMessage("This account is registered as owner. Please sign in as owner.");
+                .isInstanceOf(BadCredentialsException.class).hasMessage(INVALID_CREDENTIALS);
 
-        verify(loginAttempts, never()).recordFailure(anyString());
+        verify(loginAttempts).recordFailure(EMAIL);
         verifyNoInteractions(sessionService);
     }
 
@@ -463,7 +463,7 @@ class AuthServiceTest {
 
     @Test
     void forgotPasswordDoesNotRevealWhetherAnAccountExists() {
-        when(userRepository.findByEmailIgnoreCase("nobody@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findAllByEmailIgnoreCase("nobody@example.com")).thenReturn(List.of());
         User recentlyMailed = existingUser(UserRole.CUSTOMER, true);
         when(tokenService.issuedWithin(eq(recentlyMailed), eq(AuthTokenPurpose.PASSWORD_RESET), any())).thenReturn(true);
         AuthService service = service(VERIFY);
@@ -550,7 +550,7 @@ class AuthServiceTest {
     }
 
     private void acceptNewUsers() {
-        when(userRepository.existsByEmailIgnoreCase(anyString())).thenReturn(false);
+        when(userRepository.existsByEmailIgnoreCaseAndRole(anyString(), any())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
@@ -559,7 +559,7 @@ class AuthServiceTest {
         User user = Fixtures.user(3L, role, "Anil Varma", EMAIL);
         user.setPasswordHash(passwordEncoder.encode(PASSWORD));
         user.setEmailVerified(verified);
-        when(userRepository.findByEmailIgnoreCase(EMAIL)).thenReturn(Optional.of(user));
+        when(userRepository.findAllByEmailIgnoreCase(EMAIL)).thenReturn(List.of(user));
         return user;
     }
 

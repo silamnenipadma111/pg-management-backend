@@ -97,7 +97,7 @@ public class MockDataSeeder implements ApplicationRunner {
 
         List<SeedPg> pgs = read("pgs.json", new TypeReference<>() { });
         for (SeedPg p : pgs) {
-            User owner = userRepository.findByEmailIgnoreCase(p.ownerEmail()).orElseThrow();
+            User owner = userRepository.findByEmailIgnoreCaseAndRole(p.ownerEmail(), Enums.UserRole.OWNER).orElseThrow();
             pgService.create(owner, toRequest(p), Enums.RegisteredVia.OWNER);
         }
 
@@ -109,7 +109,8 @@ public class MockDataSeeder implements ApplicationRunner {
     }
 
     private void seedBooking(SeedBooking b) {
-        User customer = userRepository.findByEmailIgnoreCase(b.customerEmail()).orElseThrow();
+        User customer = userRepository.findByEmailIgnoreCaseAndRole(b.customerEmail(), Enums.UserRole.CUSTOMER)
+                .orElseThrow();
         Pg pg = pgRepository.findByNameIgnoreCase(b.pgName()).orElseThrow();
         Room room = pg.getRooms().stream().filter(r -> r.getRoomNumber().equals(b.roomNumber())).findFirst()
                 .orElseThrow();

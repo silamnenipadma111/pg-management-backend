@@ -40,7 +40,7 @@ app:
     cookie-secure: ${SESSION_COOKIE_SECURE:true}
     cookie-same-site: ${SESSION_COOKIE_SAME_SITE:Strict}
     # auto = new accounts must confirm their email whenever outgoing mail (MAIL_HOST) is configured
-    require-email-verification: ${REQUIRE_EMAIL_VERIFICATION:auto}
+    require-email-verification: ${REQUIRE_EMAIL_VERIFICATION:false}
     max-failed-attempts: ${LOGIN_MAX_FAILED_ATTEMPTS:5}
     lock-duration: ${LOGIN_LOCK_DURATION:15m}
     bcrypt-strength: ${BCRYPT_STRENGTH:12}

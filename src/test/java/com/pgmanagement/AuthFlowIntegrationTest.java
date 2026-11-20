@@ -71,8 +71,10 @@ class AuthFlowIntegrationTest {
     void signupRejectsDuplicatesStaffRolesAndMalformedBodies() throws Exception {
         api.perform(api.signupRequest("First User", "dup@test.in", ApiClient.STRONG_PASSWORD, CUSTOMER))
                 .andExpect(status().isCreated()).andExpect(jsonPath("$.verificationRequired").value(false));
-        api.perform(api.signupRequest("Second User", "DUP@test.in", ApiClient.STRONG_PASSWORD, OWNER))
+        api.perform(api.signupRequest("Second User", "DUP@test.in", ApiClient.STRONG_PASSWORD, CUSTOMER))
                 .andExpect(status().isConflict());
+        api.perform(api.signupRequest("Owner User", "DUP@test.in", ApiClient.STRONG_PASSWORD, OWNER))
+                .andExpect(status().isCreated());
         api.perform(api.signupRequest("Care Agent", "agent@test.in", ApiClient.STRONG_PASSWORD, "SUPPORT"))
                 .andExpect(status().isBadRequest());
         mvc.perform(post("/api/auth/signup").contentType(MediaType.APPLICATION_JSON).content("{not json"))

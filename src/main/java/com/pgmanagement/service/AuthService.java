@@ -96,7 +96,7 @@ public class AuthService {
     @Transactional
     public User createUser(String name, String email, String phone, String rawPassword, Enums.UserRole role,
                            Enums.Gender gender) {
-        if (userRepository.existsByEmailIgnoreCase(email.trim())) {
+        if (userRepository.existsByEmailIgnoreCaseAndRole(email.trim(), role)) {
             throw ApiException.conflict("An account with this email already exists");
         }
         User user = new User();
@@ -130,10 +130,10 @@ public class AuthService {
     /** Always answers the same way, so the response does not reveal which addresses have an account. */
     @Transactional
     public MessageResponse resendVerification(String email) {
-        userRepository.findByEmailIgnoreCase(email.trim())
+        userRepository.findAllByEmailIgnoreCase(email.trim()).stream()
                 .filter(user -> !user.isEmailVerified())
                 .filter(user -> !tokenService.issuedWithin(user, Enums.AuthTokenPurpose.EMAIL_VERIFICATION, MAIL_COOLDOWN))
-                .ifPresent(user -> sendVerificationMail(user, "Here is a new link to confirm your email address."));
+                .forEach(user -> sendVerificationMail(user, "Here is a new link to confirm your email address."));
         return new MessageResponse(VERIFICATION_REQUESTED);
     }
 
@@ -151,15 +151,13 @@ public class AuthService {
             throw ApiException.tooManyRequests("Too many failed sign-in attempts. Please try again in "
                     + Math.max(1, (locked + 59) / 60) + " minute(s) or reset your password.", locked);
         }
-        User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
+        User user = userRepository.findAllByEmailIgnoreCase(email).stream()
+                .filter(u -> req.role() == null || u.getRole() == req.role())
+                .findFirst().orElse(null);
         boolean passwordOk = passwordMatches(req.password(), user == null ? timingEqualizerHash : user.getPasswordHash());
         if (user == null || !passwordOk) {
             loginAttempts.recordFailure(email);
             throw new BadCredentialsException(INVALID_CREDENTIALS);
-        }
-        if (req.role() != null && req.role() != user.getRole()) {
-            String role = user.getRole().name().toLowerCase(Locale.ROOT);
-            throw new BadCredentialsException("This account is registered as " + role + ". Please sign in as " + role + ".");
         }
         if (!user.isEmailVerified() && emailVerificationRequired()) {
             throw ApiException.forbidden("Please verify your email address before signing in. "
@@ -190,9 +188,9 @@ public class AuthService {
     /** Always answers the same way, so the response does not reveal which addresses have an account. */
     @Transactional
     public MessageResponse forgotPassword(String email) {
-        userRepository.findByEmailIgnoreCase(email.trim())
+        userRepository.findAllByEmailIgnoreCase(email.trim()).stream()
                 .filter(user -> !tokenService.issuedWithin(user, Enums.AuthTokenPurpose.PASSWORD_RESET, MAIL_COOLDOWN))
-                .ifPresent(this::sendPasswordResetMail);
+                .forEach(this::sendPasswordResetMail);
         return new MessageResponse(RESET_REQUESTED);
     }
 

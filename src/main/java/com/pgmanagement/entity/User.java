@@ -8,7 +8,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "app_users")
+@Table(name = "app_users", uniqueConstraints = @UniqueConstraint(columnNames = {"email", "role"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,7 +21,7 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 150)
+    @Column(nullable = false, length = 150)
     private String email;
 
     @Column(nullable = false, length = 20)

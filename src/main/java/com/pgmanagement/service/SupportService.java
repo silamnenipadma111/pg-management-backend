@@ -75,7 +75,8 @@ public class SupportService {
     @Transactional
     public AssistedPgResponse registerForOwner(AssistedPgRequest req) {
         String tempPassword = null;
-        User owner = userRepository.findByEmailIgnoreCase(req.ownerEmail().trim()).orElse(null);
+        User owner = userRepository.findByEmailIgnoreCaseAndRole(req.ownerEmail().trim(), Enums.UserRole.OWNER)
+                .orElse(null);
         if (owner == null) {
             tempPassword = randomPassword();
             owner = authService.createUser(req.ownerName(), req.ownerEmail(), req.ownerPhone(), tempPassword,

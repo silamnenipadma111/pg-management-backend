@@ -125,7 +125,7 @@ class SupportServiceTest {
     void registeringForANewOwnerCreatesTheAccountAndMailsASetupLink() {
         User owner = Fixtures.user(5L, Enums.UserRole.OWNER, "Phone Owner", OWNER_EMAIL);
         SupportRequest linked = new SupportRequest();
-        when(userRepository.findByEmailIgnoreCase(OWNER_EMAIL)).thenReturn(Optional.empty());
+        when(userRepository.findByEmailIgnoreCaseAndRole(OWNER_EMAIL, Enums.UserRole.OWNER)).thenReturn(Optional.empty());
         when(authService.createUser(eq("Phone Owner"), eq(OWNER_EMAIL), eq("9000000001"), anyString(),
                 eq(Enums.UserRole.OWNER), eq(null))).thenReturn(owner);
         when(supportRequestRepository.findById(3L)).thenReturn(Optional.of(linked));
@@ -146,7 +146,7 @@ class SupportServiceTest {
     @Test
     void registeringForAnExistingOwnerNotifiesOnEveryChannel() {
         User owner = Fixtures.user(5L, Enums.UserRole.OWNER, "Ravi Kumar", OWNER_EMAIL);
-        when(userRepository.findByEmailIgnoreCase(OWNER_EMAIL)).thenReturn(Optional.of(owner));
+        when(userRepository.findByEmailIgnoreCaseAndRole(OWNER_EMAIL, Enums.UserRole.OWNER)).thenReturn(Optional.of(owner));
         PgRequest pgRequest = mock(PgRequest.class);
         registeredPg(owner, pgRequest);
 
@@ -162,7 +162,7 @@ class SupportServiceTest {
     @Test
     void anEmailOfANonOwnerAccountCannotBeUsed() {
         User customer = Fixtures.user(5L, Enums.UserRole.CUSTOMER, "Anil", OWNER_EMAIL);
-        when(userRepository.findByEmailIgnoreCase(OWNER_EMAIL)).thenReturn(Optional.of(customer));
+        when(userRepository.findByEmailIgnoreCaseAndRole(OWNER_EMAIL, Enums.UserRole.OWNER)).thenReturn(Optional.of(customer));
         AssistedPgRequest request = new AssistedPgRequest("Anil", OWNER_EMAIL, "9000000001", null, mock(PgRequest.class));
 
         assertThatThrownBy(() -> service.registerForOwner(request)).isInstanceOf(ApiException.class)
